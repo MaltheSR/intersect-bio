@@ -38,7 +38,7 @@ impl SequenceDict {
     {
         // Check that both chromosomes are contained
         if !(self.contains(first) && self.contains(second)) {
-            return None
+            return None;
         }
 
         // Get ordering
@@ -47,13 +47,10 @@ impl SequenceDict {
             Some(first.pos().cmp(&second.pos()))
         } else {
             // Different chromosomes, order by chromosome order
-            Some(
-                Ord::cmp(
-                    &self.0.get_index_of(first.chrom()).unwrap(),
-                    &self.0.get_index_of(second.chrom()).unwrap(),
-                )
-            )
-
+            Some(Ord::cmp(
+                &self.0.get_index_of(first.chrom()).unwrap(),
+                &self.0.get_index_of(second.chrom()).unwrap(),
+            ))
         }
     }
 
@@ -76,7 +73,7 @@ impl SequenceDict {
     /// ```
     pub fn contains<T>(&self, chrom_pos: &T) -> bool
     where
-        T: ChromPos
+        T: ChromPos,
     {
         self.0.contains(chrom_pos.chrom())
     }
@@ -99,12 +96,9 @@ impl SequenceDict {
     pub fn from_sequence<I, T>(sequence: I) -> Self
     where
         I: IntoIterator<Item = T>,
-        T: ToString
+        T: ToString,
     {
-        let set: IndexSet<String> = sequence
-            .into_iter()
-            .map(|x| x.to_string())
-            .collect();
+        let set: IndexSet<String> = sequence.into_iter().map(|x| x.to_string()).collect();
 
         Self::new(set)
     }
@@ -127,15 +121,12 @@ impl SequenceDict {
     pub fn from_merged_sequences<I, T>(sequences: Vec<I>) -> Self
     where
         I: IntoIterator<Item = T>,
-        T: ToString
+        T: ToString,
     {
         let mut set = IndexSet::<String>::default();
 
         for (i, seq) in sequences.into_iter().enumerate() {
-            let new_set: IndexSet<String> = seq
-                .into_iter()
-                .map(|x| x.to_string())
-                .collect();
+            let new_set: IndexSet<String> = seq.into_iter().map(|x| x.to_string()).collect();
 
             if i == 0 {
                 set = new_set;

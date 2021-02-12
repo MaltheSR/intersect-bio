@@ -14,7 +14,7 @@ pub trait ChromPos {
 
 impl<T> ChromPos for (T, u32)
 where
-    T: AsRef<str>
+    T: AsRef<str>,
 {
     fn chrom(&self) -> &str {
         self.0.as_ref()
