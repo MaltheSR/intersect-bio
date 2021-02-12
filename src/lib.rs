@@ -1,7 +1,10 @@
 mod merge;
 mod chrom_dict;
 
-pub use self::{merge::Merge, chrom_dict::ChromDict};
+#[cfg(feature = "rust-htslib")]
+mod rust_htslib;
+
+pub use self::{chrom_dict::ChromDict, merge::Merge};
 
 pub trait ChromPos {
     fn chrom(&self) -> &str;
