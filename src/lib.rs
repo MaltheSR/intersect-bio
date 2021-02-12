@@ -1,3 +1,7 @@
+mod sequence_dict;
+
+pub use sequence_dict::SequenceDict;
+
 pub trait ChromPos {
     fn chrom(&self) -> &str;
 
