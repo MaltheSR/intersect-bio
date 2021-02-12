@@ -5,3 +5,4 @@ authors = ["Malthe Sebro Rasmussen <malthe.rasmussen@bio.ku.dk>"]
 edition = "2018"
 
 [dependencies]
+indexmap = { version = "1.6.*", default-features = false }
