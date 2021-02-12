@@ -1,6 +1,6 @@
-mod sequence_dict;
+mod chrom_dict;
 
-pub use sequence_dict::SequenceDict;
+pub use self::chrom_dict::ChromDict;
 
 pub trait ChromPos {
     fn chrom(&self) -> &str;
