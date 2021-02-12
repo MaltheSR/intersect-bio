@@ -1,6 +1,7 @@
+mod merge;
 mod chrom_dict;
 
-pub use self::chrom_dict::ChromDict;
+pub use self::{merge::Merge, chrom_dict::ChromDict};
 
 pub trait ChromPos {
     fn chrom(&self) -> &str;
