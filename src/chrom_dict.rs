@@ -1,57 +1,50 @@
-use std::cmp;
+use std::{cmp, iter::FromIterator};
 
 use indexmap::IndexSet;
 
 use crate::ChromPos;
 
-/// A chromosome dictionary.
+/// Ordered chromosome dictionary.
 ///
-/// Contains an ordered set of chromosome identifers. Merging positions from multiple sources
-/// requires creating a chromosome dictionary containing the identifiers of all chromosomes
-/// that occur in all input sources, in the same order that they occur in those sources.
+/// Efficient merging of positions across multiple ordered files requires pre-computing the subset
+/// of chromosomes that occur in all files, as well as the ordering of this subset. We refer to this
+/// information as a "chromosome dictionary".
+///
+/// Typically, the ordered chromosome IDs for each file can be obtained from a header (or similar),
+/// and the chromosome dictionary may then be conveniently constructed using
+/// [`from_intersection`](Self::from_intersection).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ChromDict(IndexSet<String>);
 
 impl ChromDict {
-    /// Order positions according to chromosome dictionary.
+    /// Order positions relative to dictionary.
     ///
-    /// If the chromosome identifiers of both positions are contained in the dict,
-    /// returns an ordering relative to the chromosome dictionary. Otherwise, returns `None`.
+    /// If both positions are on chromosomes in the dictionary, returns the ordering of positions.
+    /// Otherwise, returns `None`.
     ///
     /// # Examples
     ///
     /// ```
-    /// use std::cmp::Ordering;
-    /// use merge_bio::ChromDict;
+    /// # use std::cmp::Ordering;
+    /// # use merge_bio::ChromDict;
+    /// let ids = vec!["1", "2"];
+    /// let dict = ChromDict::from_ids(ids);
     ///
-    /// let chromosomes = vec!["1", "2"];
-    /// let dict = ChromDict::from_chromosomes(chromosomes);
-    ///
-    /// let first = ("1", 34);
-    /// let second = ("1", 50);
-    /// assert_eq!(dict.compare(&first, &second), Some(Ordering::Less));
-    ///
-    /// let third = ("2", 5);
-    /// assert_eq!(dict.compare(&third, &second), Some(Ordering::Greater));
-    ///
-    /// let fourth = ("3", 11);
-    /// assert_eq!(dict.compare(&first, &fourth), None);
+    /// assert_eq!(dict.compare(&("1", 2), &("2", 1)), Some(Ordering::Less));
+    /// assert_eq!(dict.compare(&("2", 5), &("2", 2)), Some(Ordering::Greater));
+    /// assert_eq!(dict.compare(&("1", 2), &("3", 2)), None);
     /// ```
     pub fn compare<T>(&self, first: &T, second: &T) -> Option<cmp::Ordering>
     where
         T: ChromPos,
     {
-        // Check that both chromosomes are contained
         if !(self.contains(first) && self.contains(second)) {
             return None;
         }
 
-        // Get ordering
         if first.chrom() == second.chrom() {
-            // Same chromosome, order by position within chromosome
             Some(first.pos().cmp(&second.pos()))
         } else {
-            // Different chromosomes, order by chromosome order
             Some(Ord::cmp(
                 &self.0.get_index_of(first.chrom()).unwrap(),
                 &self.0.get_index_of(second.chrom()).unwrap(),
@@ -59,16 +52,14 @@ impl ChromDict {
         }
     }
 
-    /// Checks whether position is located on a chromosome contained in chromosome dictionary.
+    /// Checks whether position is on a chromosome in the dictionary.
     ///
     /// # Examples
     ///
     /// ```
-    /// use std::cmp::Ordering;
-    /// use merge_bio::ChromDict;
+    /// # use merge_bio::ChromDict;
     ///
-    /// let chromosomes = vec!["1", "2"];
-    /// let dict = ChromDict::from_chromosomes(chromosomes);
+    /// let dict = ChromDict::from_ids(vec!["1", "2"]);
     ///
     /// let first = ("1", 34);
     /// assert!(dict.contains(&first));
@@ -83,71 +74,102 @@ impl ChromDict {
         self.0.contains(chrom_pos.chrom())
     }
 
-    /// Create chromosome dictionary from a single set of chromosome identifiers.
+    /// Create dictionary from chromosome IDs.
     ///
-    /// This assumes that chromosomes have already been intersected and ordered.
-    /// For most use-cases, the [`from_merged_chromosomes`](Self::from_merged_chromosomes)
-    /// constructor will likely be more convenient.
+    /// See [`from_intersection`](Self::from_intersection) for creating dictionary from multiple
+    /// sources.
     ///
     /// # Examples
     ///
     /// ```
-    /// use merge_bio::ChromDict;
+    /// # use merge_bio::ChromDict;
+    /// let ids = vec!["1", "2"];
     ///
-    /// let chromosomes = vec!["1", "2"];
-    ///
-    /// let dict = ChromDict::from_chromosomes(chromosomes);
+    /// let dict = ChromDict::from_ids(ids);
     /// ```
-    pub fn from_chromosomes<I, T>(chromosomes: I) -> Self
+    pub fn from_ids<I, T>(ids: I) -> Self
     where
         I: IntoIterator<Item = T>,
         T: ToString,
     {
-        let set: IndexSet<String> = chromosomes.into_iter().map(|x| x.to_string()).collect();
+        let set: IndexSet<String> = ids.into_iter().map(|x| x.to_string()).collect();
 
         Self::new(set)
     }
 
-    /// Create chromosome dictionary by merging chromosome identifiers from multiple sources.
+    /// Intersect dictionaries.
     ///
-    /// Note that this assumes that the subset of chromosome identifiers that occur in all source
-    /// occur in the same ordering in each of the sources.
+    /// Subset `self` to only contain entries also found in `other`.
     ///
     /// # Examples
     ///
     /// ```
-    /// use merge_bio::ChromDict;
+    /// # use merge_bio::ChromDict;
+    /// let mut first_dict = ChromDict::from_ids(vec!["1", "2", "4", "5"]);
+    /// let second_dict = ChromDict::from_ids(vec!["2", "3", "4"]);
     ///
-    /// let first = vec!["1", "2", "3", "4"];
-    /// let second = vec!["1", "2", "4"];
-    /// let third = vec!["2", "3", "4"];
-    ///
-    /// let dict = ChromDict::from_merged_chromosomes(vec![first, second, third]);
-    ///
-    /// assert_eq!(dict, ChromDict::from_chromosomes(vec!["2", "4"]));
+    /// first_dict.intersect(&second_dict);
+    /// assert_eq!(first_dict, ChromDict::from_ids(vec!["2", "4"]));
     /// ```
-    pub fn from_merged_chromosomes<I, T>(chromosomes: Vec<I>) -> Self
+    pub fn intersect(&mut self, other: &Self) {
+        self.0.retain(|x| other.0.contains(x))
+    }
+
+    /// Create dictionary from intersection of chromosome IDs from multiple sources.
+    ///
+    /// This takes IDs from multiple sources and finds the intersection.
+    /// It is assumed that the IDs are sorted the same way in each source.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use merge_bio::ChromDict;
+    /// let first_ids = vec!["1", "2", "3", "4"];
+    /// let second_ids = vec!["1", "2", "4"];
+    /// let third_ids = vec!["2", "3", "4"];
+    ///
+    /// let dict = ChromDict::from_intersection(vec![first_ids, second_ids, third_ids]);
+    ///
+    /// assert_eq!(dict, ChromDict::from_ids(vec!["2", "4"]));
+    /// ```
+    pub fn from_intersection<I, T>(mut id_sources: Vec<I>) -> Self
     where
         I: IntoIterator<Item = T>,
         T: ToString,
     {
-        let mut set = IndexSet::<String>::default();
-
-        for (i, chrom) in chromosomes.into_iter().enumerate() {
-            let new_set: IndexSet<String> = chrom.into_iter().map(|x| x.to_string()).collect();
-
-            if i == 0 {
-                set = new_set;
-            } else {
-                set.retain(|x| new_set.contains(x));
-            }
+        if id_sources.is_empty() {
+            return Self::default();
         }
 
-        Self::new(set)
+        let mut dict = Self::from_iter(id_sources.pop().unwrap());
+
+        id_sources.into_iter().for_each(|src| {
+            dict.intersect(&Self::from_iter(src))
+        });
+
+        dict
     }
 
-    /// Create new chromosome dictionary.
+    /// Create new dictionary.
     fn new(ordering: IndexSet<String>) -> Self {
         Self(ordering)
+    }
+}
+
+impl Default for ChromDict {
+    fn default() -> Self {
+        ChromDict::new(IndexSet::<String>::default())
+    }
+}
+
+impl<T> FromIterator<T> for ChromDict
+where
+    T: ToString
+{
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = T>
+    {
+        Self::new(iter.into_iter().map(|x| x.to_string()).collect())
     }
 }
