@@ -10,7 +10,7 @@ use crate::{ChromPos, ChromDict};
 ///
 /// The intersection of chromosomes and their ordering must be pre-calculated from
 /// from header information or otherwise and stored in a [`ChromDict`]. See in particular
-/// [`ChromDict::from_merged_chromosomes`](ChromDict::from_merged_chromosomes)
+/// [`ChromDict::from_intersection`](ChromDict::intersection)
 /// for help.
 pub struct Merge<I, T>
 where
@@ -41,7 +41,7 @@ where
     ///
     /// The intersection of chromosomes and their ordering must be pre-calculated
     /// and stored in a [`ChromDict`].
-    /// See in particular [`ChromDict::from_merged_chromosomes`](ChromDict::from_merged_chromosomes)
+    /// See in particular [`ChromDict::from_intersection`](ChromDict::from_intersection)
     /// for help.
     pub fn new(input: Vec<I>, dict: ChromDict) -> Self {
         Self {
@@ -182,7 +182,7 @@ mod tests {
     fn next_in_dict() {
         let positions = vec![("1", 1), ("1", 2), ("2", 1), ("2", 3), ("4", 2), ("5", 1)];
 
-        let dict = ChromDict::from_chromosomes(vec!["2", "4"]);
+        let dict = ChromDict::from_ids(vec!["2", "4"]);
 
         let mut search = Search::new(positions.into_iter().map(|x| Ok(x)));
 
@@ -196,7 +196,7 @@ mod tests {
     fn search() {
         let positions = vec![("1", 1), ("1", 2), ("2", 1), ("2", 3), ("4", 2), ("5", 1)];
 
-        let dict = ChromDict::from_chromosomes(vec!["2", "4"]);
+        let dict = ChromDict::from_ids(vec!["2", "4"]);
 
         let mut iter = Search::new(positions.into_iter().map(|x| Ok(x)));
 
