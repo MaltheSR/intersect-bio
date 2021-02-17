@@ -4,10 +4,14 @@ use rust_htslib::bcf;
 
 use crate::{ChromDict, ChromPos, Merge};
 
-impl<'a, R> Merge<Records<'a, R>, bcf::Record>
+impl<'a, R> Merge<Records<'a, R>>
 where
     R: bcf::Read
 {
+    /// Create new merge iterator from VCF readers.
+    ///
+    /// Chromosome dictionary is automatically created based on header information. VCF files
+    /// are assumed to be sorted.
     pub fn vcfs(readers: &'a mut [R]) -> Self {
         let headers = readers.iter().map(|x| x.header()).collect::<Vec<_>>();
 
@@ -19,6 +23,7 @@ where
     }
 }
 
+/// Wrapper struct to transform htslib::errors:Error into io::Error
 struct Records<'a, R>(bcf::Records<'a, R>) where R: bcf::Read;
 
 impl<'a, R> Iterator for Records<'a, R>
@@ -52,6 +57,7 @@ impl From<&[&bcf::header::HeaderView]> for ChromDict {
     }
 }
 
+/// Get contig names from VCF header.
 fn contigs(header: &bcf::header::HeaderView) -> Vec<String> {
     header
         .header_records()
