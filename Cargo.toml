@@ -9,6 +9,7 @@ default = ["rust-htslib"]
 
 [dev-dependencies]
 merge-bio = { path = ".", features = ["rust-htslib"] }
+rand = "0.8"
 
 [dependencies]
 indexmap = { version = "1.6", default-features = false }
