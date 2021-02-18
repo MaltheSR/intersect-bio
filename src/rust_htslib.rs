@@ -26,8 +26,14 @@ where
     }
 }
 
-/// Wrapper struct to transform htslib::errors:Error into io::Error
-struct Records<'a, R>(bcf::Records<'a, R>)
+/// VCF record iterator.
+///
+/// This is a thin wrapper around the [`rust_htslib::bcf::Records`] iterator,
+/// transforming the `rust_htslib` errors into `std::io::Error`.
+///
+/// Users should not need to interact with this struct, but it has to be public
+/// since it is exposed as a type argument in the [`Intersect::vcfs`] constructor.
+pub struct Records<'a, R>(bcf::Records<'a, R>)
 where
     R: bcf::Read;
 
