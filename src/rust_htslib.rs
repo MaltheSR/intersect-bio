@@ -86,7 +86,7 @@ fn contigs(header: &bcf::header::HeaderView) -> Vec<String> {
                     .expect("VCF header contig line did not contain 'ID' field");
 
                 Some(id.1)
-            },
+            }
             _ => None,
         })
         .collect()

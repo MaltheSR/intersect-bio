@@ -34,9 +34,18 @@ fn main() -> io::Result<()> {
 
         let chrom = site[0].chrom();
         let pos = site[0].pos();
-        let gt = site.iter().map(|record| {
-            format!("{}", record.genotypes().expect("cannot get record genotypes").get(0))
-        }).collect::<Vec<_>>();
+        let gt = site
+            .iter()
+            .map(|record| {
+                format!(
+                    "{}",
+                    record
+                        .genotypes()
+                        .expect("cannot get record genotypes")
+                        .get(0)
+                )
+            })
+            .collect::<Vec<_>>();
 
         writeln!(writer, "{}\t{}\t{}", chrom, pos, gt.join(";"))?;
     }
