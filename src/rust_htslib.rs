@@ -79,8 +79,40 @@ fn contigs(header: &bcf::header::HeaderView) -> Vec<String> {
         .header_records()
         .into_iter()
         .filter_map(|x| match x {
-            bcf::header::HeaderRecord::Contig { key, .. } => Some(key),
+            bcf::header::HeaderRecord::Contig { values, .. } => {
+                let id = values
+                    .into_iter()
+                    .find(|(k, _)| k == "ID")
+                    .expect("VCF header contig line did not contain 'ID' field");
+
+                Some(id.1)
+            },
             _ => None,
         })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn contigs_from_header() -> rust_htslib::errors::Result<()> {
+        let ids = vec![1, 2, 4, 7];
+
+        let mut header = bcf::Header::new();
+
+        for id in ids.iter() {
+            let header_contig_line = format!(r#"##contig=<ID={},length=10>"#, id);
+            header.push_record(header_contig_line.as_bytes());
+        }
+
+        let vcf = bcf::Writer::from_path("/dev/null", &header, false, bcf::Format::BCF)?;
+        let header = vcf.header();
+
+        let expected = ids.iter().map(|x| x.to_string()).collect::<Vec<_>>();
+        assert_eq!(contigs(&header), expected);
+
+        Ok(())
+    }
 }
