@@ -6,7 +6,7 @@ use crate::{ChromDict, ChromPos, Merge};
 
 impl<'a, R> Merge<Records<'a, R>>
 where
-    R: bcf::Read
+    R: bcf::Read,
 {
     /// Create new merge iterator from VCF readers.
     ///
@@ -17,23 +17,30 @@ where
 
         let dict = ChromDict::from(headers.as_slice());
 
-        let iters = readers.iter_mut().map(|x| Records(x.records())).collect::<Vec<_>>();
+        let iters = readers
+            .iter_mut()
+            .map(|x| Records(x.records()))
+            .collect::<Vec<_>>();
 
         Self::new(iters, dict)
     }
 }
 
 /// Wrapper struct to transform htslib::errors:Error into io::Error
-struct Records<'a, R>(bcf::Records<'a, R>) where R: bcf::Read;
+struct Records<'a, R>(bcf::Records<'a, R>)
+where
+    R: bcf::Read;
 
 impl<'a, R> Iterator for Records<'a, R>
 where
-    R: bcf::Read
+    R: bcf::Read,
 {
     type Item = io::Result<bcf::Record>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.0.next().map(|x| x.map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string())))
+        self.0
+            .next()
+            .map(|x| x.map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string())))
     }
 }
 
@@ -41,7 +48,10 @@ impl ChromPos for bcf::Record {
     fn chrom(&self) -> &str {
         let rid = self.rid().expect("VCF record has no rid");
 
-        let bytes = self.header().rid2name(rid).expect("cannot get VCF record contig name");
+        let bytes = self
+            .header()
+            .rid2name(rid)
+            .expect("cannot get VCF record contig name");
 
         std::str::from_utf8(bytes).expect("cannot convert VCF record contig name to UTF8")
     }
@@ -62,11 +72,9 @@ fn contigs(header: &bcf::header::HeaderView) -> Vec<String> {
     header
         .header_records()
         .into_iter()
-        .filter_map(|x| {
-            match x {
-                bcf::header::HeaderRecord::Contig { key, .. } => Some(key),
-                _ => None,
-            }
+        .filter_map(|x| match x {
+            bcf::header::HeaderRecord::Contig { key, .. } => Some(key),
+            _ => None,
         })
         .collect()
 }

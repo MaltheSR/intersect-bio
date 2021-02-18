@@ -1,5 +1,5 @@
-mod merge;
 mod chrom_dict;
+mod merge;
 
 #[cfg(feature = "rust-htslib")]
 mod rust_htslib;

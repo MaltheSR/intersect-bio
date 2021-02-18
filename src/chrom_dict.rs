@@ -143,9 +143,9 @@ impl ChromDict {
 
         let mut dict = Self::from_iter(id_sources.pop().unwrap());
 
-        id_sources.into_iter().for_each(|src| {
-            dict.intersect(&Self::from_iter(src))
-        });
+        id_sources
+            .into_iter()
+            .for_each(|src| dict.intersect(&Self::from_iter(src)));
 
         dict
     }
@@ -164,11 +164,11 @@ impl Default for ChromDict {
 
 impl<T> FromIterator<T> for ChromDict
 where
-    T: ToString
+    T: ToString,
 {
     fn from_iter<I>(iter: I) -> Self
     where
-        I: IntoIterator<Item = T>
+        I: IntoIterator<Item = T>,
     {
         Self::new(iter.into_iter().map(|x| x.to_string()).collect())
     }

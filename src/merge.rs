@@ -1,6 +1,9 @@
-use std::{cmp, io, ops::{Index, IndexMut}};
+use std::{
+    cmp, io,
+    ops::{Index, IndexMut},
+};
 
-use crate::{ChromPos, ChromDict};
+use crate::{ChromDict, ChromPos};
 
 /// Merge iterator.
 ///
@@ -9,7 +12,7 @@ use crate::{ChromPos, ChromDict};
 /// is computed ahead of time. See [`ChromDict`] for details.
 pub struct Merge<I> {
     iters: Vec<Search<I>>,
-    dict: ChromDict
+    dict: ChromDict,
 }
 
 impl<I> Merge<I> {
@@ -25,7 +28,7 @@ impl<I> Merge<I> {
 impl<I, T> Merge<I>
 where
     I: Iterator<Item = io::Result<T>>,
-    T: ChromPos
+    T: ChromPos,
 {
     /// Find next candidate positions.
     ///
@@ -46,7 +49,7 @@ where
 impl<I, T> Iterator for Merge<I>
 where
     I: Iterator<Item = io::Result<T>>,
-    T: ChromPos
+    T: ChromPos,
 {
     type Item = io::Result<Vec<T>>;
 
@@ -70,7 +73,7 @@ where
                 if !positions[i].intersect(max) {
                     positions[i] = match self.iters[i].search(max, &self.dict)? {
                         Ok(v) => v,
-                        Err(e) => return Some(Err(e))
+                        Err(e) => return Some(Err(e)),
                     };
                 }
             }
@@ -154,7 +157,7 @@ impl<I> Search<I> {
 impl<I, T> Search<I>
 where
     I: Iterator<Item = io::Result<T>>,
-    T: ChromPos
+    T: ChromPos,
 {
     /// Find next candidate position.
     ///
@@ -207,7 +210,9 @@ mod tests {
         v.into_iter().map(|x| Ok(x))
     }
 
-    fn mock_input<'a>(vs: Vec<Vec<(&'a str, u32)>>) -> Vec<impl Iterator<Item = io::Result<(&'a str, u32)>>> {
+    fn mock_input<'a>(
+        vs: Vec<Vec<(&'a str, u32)>>,
+    ) -> Vec<impl Iterator<Item = io::Result<(&'a str, u32)>>> {
         vs.into_iter().map(|x| mock_source(x)).collect()
     }
 
@@ -217,14 +222,28 @@ mod tests {
 
         let input = mock_input(vec![
             vec![("1", 1), ("1", 2), ("2", 1), ("2", 3), ("4", 1)],
-            vec![("1", 1), ("1", 2), ("2", 2), ("2", 3), ("4", 1), ("4", 5), ("5", 1)],
+            vec![
+                ("1", 1),
+                ("1", 2),
+                ("2", 2),
+                ("2", 3),
+                ("4", 1),
+                ("4", 5),
+                ("5", 1),
+            ],
             vec![("2", 1), ("2", 2), ("2", 3), ("3", 1), ("4", 1), ("4", 7)],
         ]);
 
         let mut merge = Merge::new(input, dict);
 
-        assert_eq!(merge.next().unwrap().unwrap(), vec![("2", 3), ("2", 3), ("2", 3)]);
-        assert_eq!(merge.next().unwrap().unwrap(), vec![("4", 1), ("4", 1), ("4", 1)]);
+        assert_eq!(
+            merge.next().unwrap().unwrap(),
+            vec![("2", 3), ("2", 3), ("2", 3)]
+        );
+        assert_eq!(
+            merge.next().unwrap().unwrap(),
+            vec![("4", 1), ("4", 1), ("4", 1)]
+        );
         assert!(matches!(merge.next(), None));
     }
 
