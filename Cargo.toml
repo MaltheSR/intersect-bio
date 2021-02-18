@@ -1,5 +1,5 @@
 [package]
-name = "merge-bio"
+name = "intersect-bio"
 version = "0.1.0"
 authors = ["Malthe Sebro Rasmussen <malthe.rasmussen@bio.ku.dk>"]
 edition = "2018"
@@ -8,7 +8,7 @@ edition = "2018"
 default = ["rust-htslib"]
 
 [dev-dependencies]
-merge-bio = { path = ".", features = ["rust-htslib"] }
+intersect-bio = { path = ".", features = ["rust-htslib"] }
 rand = "0.8"
 
 [dependencies]
