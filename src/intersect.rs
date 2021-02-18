@@ -19,7 +19,7 @@ impl<I> Intersect<I> {
     /// Create new intersect iterator.
     pub fn new(input: Vec<I>, dict: ChromDict) -> Self {
         Self {
-            iters: input.into_iter().map(|x| Search::new(x)).collect(),
+            iters: input.into_iter().map(Search::new).collect(),
             dict,
         }
     }

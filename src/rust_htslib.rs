@@ -69,7 +69,7 @@ impl ChromPos for bcf::Record {
 
 impl From<&[&bcf::header::HeaderView]> for ChromDict {
     fn from(headers: &[&bcf::header::HeaderView]) -> Self {
-        ChromDict::from_intersection(headers.into_iter().map(|x| contigs(x)).collect())
+        ChromDict::from_intersection(headers.iter().map(|x| contigs(x)).collect())
     }
 }
 
