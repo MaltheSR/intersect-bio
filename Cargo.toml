@@ -2,6 +2,7 @@
 name = "intersect-bio"
 version = "0.1.0"
 authors = ["Malthe Sebro Rasmussen <malthe.rasmussen@bio.ku.dk>"]
+license = "MIT"
 edition = "2018"
 
 [features]
