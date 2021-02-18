@@ -27,7 +27,7 @@ where
 
 
 #[test]
-fn merge_vcfs() -> io::Result<()> {
+fn intersect_vcfs() -> io::Result<()> {
     fs::create_dir_all(vcf_dir())?;
 
     // Required file paths

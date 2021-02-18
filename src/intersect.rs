@@ -5,18 +5,18 @@ use std::{
 
 use crate::{ChromDict, ChromPos};
 
-/// Merge iterator.
+/// Intersect iterator.
 ///
 /// An iterator over the intersection of positions in pre-sorted files, where a position
 /// is anything that implements [`ChromPos`]. Merging requires that a chromosome dictionary
 /// is computed ahead of time. See [`ChromDict`] for details.
-pub struct Merge<I> {
+pub struct Intersect<I> {
     iters: Vec<Search<I>>,
     dict: ChromDict,
 }
 
-impl<I> Merge<I> {
-    /// Create new merge iterator.
+impl<I> Intersect<I> {
+    /// Create new intersect iterator.
     pub fn new(input: Vec<I>, dict: ChromDict) -> Self {
         Self {
             iters: input.into_iter().map(|x| Search::new(x)).collect(),
@@ -25,7 +25,7 @@ impl<I> Merge<I> {
     }
 }
 
-impl<I, T> Merge<I>
+impl<I, T> Intersect<I>
 where
     I: Iterator<Item = io::Result<T>>,
     T: ChromPos,
@@ -46,7 +46,7 @@ where
     }
 }
 
-impl<I, T> Iterator for Merge<I>
+impl<I, T> Iterator for Intersect<I>
 where
     I: Iterator<Item = io::Result<T>>,
     T: ChromPos,
@@ -217,7 +217,7 @@ mod tests {
     }
 
     #[test]
-    fn merge() {
+    fn intersect() {
         let dict = ChromDict::from_ids(vec!["2", "4"]);
 
         let input = mock_input(vec![
@@ -234,17 +234,17 @@ mod tests {
             vec![("2", 1), ("2", 2), ("2", 3), ("3", 1), ("4", 1), ("4", 7)],
         ]);
 
-        let mut merge = Merge::new(input, dict);
+        let mut intersect = Intersect::new(input, dict);
 
         assert_eq!(
-            merge.next().unwrap().unwrap(),
+            intersect.next().unwrap().unwrap(),
             vec![("2", 3), ("2", 3), ("2", 3)]
         );
         assert_eq!(
-            merge.next().unwrap().unwrap(),
+            intersect.next().unwrap().unwrap(),
             vec![("4", 1), ("4", 1), ("4", 1)]
         );
-        assert!(matches!(merge.next(), None));
+        assert!(matches!(intersect.next(), None));
     }
 
     #[test]

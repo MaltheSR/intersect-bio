@@ -1,10 +1,10 @@
 mod chrom_dict;
-mod merge;
+mod intersect;
 
 #[cfg(feature = "rust-htslib")]
 mod rust_htslib;
 
-pub use self::{chrom_dict::ChromDict, merge::Merge};
+pub use self::{chrom_dict::ChromDict, intersect::Intersect};
 
 /// A genomic position.
 ///
@@ -23,7 +23,7 @@ pub trait ChromPos {
     /// # Examples
     ///
     /// ```
-    /// # use merge_bio::ChromPos;
+    /// # use intersect_bio::ChromPos;
     /// assert!(("1", 1).intersect(&("1", 1)));
     /// ```
     fn intersect(&self, other: &Self) -> bool {

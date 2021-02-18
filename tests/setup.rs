@@ -140,6 +140,6 @@ where
     if tmp_status.success() && status.success() {
         Ok(())
     } else {
-        Err(io::Error::new(io::ErrorKind::Other, "failed to merge VCFs with bcftools"))
+        Err(io::Error::new(io::ErrorKind::Other, "failed to intersect VCFs with bcftools"))
     }
 }

@@ -2,13 +2,13 @@ use std::{convert::TryFrom, io};
 
 use rust_htslib::bcf;
 
-use crate::{ChromDict, ChromPos, Merge};
+use crate::{ChromDict, ChromPos, Intersect};
 
-impl<'a, R> Merge<Records<'a, R>>
+impl<'a, R> Intersect<Records<'a, R>>
 where
     R: bcf::Read,
 {
-    /// Create new merge iterator from VCF readers.
+    /// Create new intersect iterator from VCF readers.
     ///
     /// Chromosome dictionary is automatically created based on header information. VCF files
     /// are assumed to be sorted.

@@ -26,7 +26,7 @@ impl ChromDict {
     ///
     /// ```
     /// # use std::cmp::Ordering;
-    /// # use merge_bio::ChromDict;
+    /// # use intersect_bio::ChromDict;
     /// let ids = vec!["1", "2"];
     /// let dict = ChromDict::from_ids(ids);
     ///
@@ -57,7 +57,7 @@ impl ChromDict {
     /// # Examples
     ///
     /// ```
-    /// # use merge_bio::ChromDict;
+    /// # use intersect_bio::ChromDict;
     ///
     /// let dict = ChromDict::from_ids(vec!["1", "2"]);
     ///
@@ -82,7 +82,7 @@ impl ChromDict {
     /// # Examples
     ///
     /// ```
-    /// # use merge_bio::ChromDict;
+    /// # use intersect_bio::ChromDict;
     /// let ids = vec!["1", "2"];
     ///
     /// let dict = ChromDict::from_ids(ids);
@@ -104,7 +104,7 @@ impl ChromDict {
     /// # Examples
     ///
     /// ```
-    /// # use merge_bio::ChromDict;
+    /// # use intersect_bio::ChromDict;
     /// let mut first_dict = ChromDict::from_ids(vec!["1", "2", "4", "5"]);
     /// let second_dict = ChromDict::from_ids(vec!["2", "3", "4"]);
     ///
@@ -123,7 +123,7 @@ impl ChromDict {
     /// # Examples
     ///
     /// ```
-    /// # use merge_bio::ChromDict;
+    /// # use intersect_bio::ChromDict;
     /// let first_ids = vec!["1", "2", "3", "4"];
     /// let second_ids = vec!["1", "2", "4"];
     /// let third_ids = vec!["2", "3", "4"];
