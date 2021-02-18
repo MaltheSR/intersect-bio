@@ -113,7 +113,10 @@ pub fn bcftools_intersect<P>(in_paths: &[P], out_path: P) -> io::Result<()>
 where
     P: AsRef<path::Path>,
 {
-    let in_paths = in_paths.iter().map(|x| x.as_ref().as_os_str()).collect::<Vec<_>>();
+    let in_paths = in_paths
+        .iter()
+        .map(|x| x.as_ref().as_os_str())
+        .collect::<Vec<_>>();
 
     let tmp_path = out_path.as_ref().with_extension("gz.tmp");
 
@@ -140,6 +143,9 @@ where
     if tmp_status.success() && status.success() {
         Ok(())
     } else {
-        Err(io::Error::new(io::ErrorKind::Other, "failed to intersect VCFs with bcftools"))
+        Err(io::Error::new(
+            io::ErrorKind::Other,
+            "failed to intersect VCFs with bcftools",
+        ))
     }
 }
